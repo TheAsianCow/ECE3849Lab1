@@ -15,8 +15,11 @@
 #include "driverlib/timer.h"
 #include "driverlib/interrupt.h"
 #include "driverlib/adc.h"
+#include "Crystalfontz128x128_ST7735.h"
 #include "sysctl_pll.h"
+#include "math.h"
 
+volatile uint32_t gADCErrors; // number of missed ADC deadlines
 volatile int32_t gADCBufferIndex = ADC_BUFFER_SIZE - 1; // latest sample index
 
 void ADC1_Init(void){
@@ -47,3 +50,26 @@ void ADC_ISR(void){
      }
      gADCBuffer[gADCBufferIndex = ADC_BUFFER_WRAP(gADCBufferIndex + 1)] = ADC1_SSFIFO0_R & ADC_SSFIFO0_DATA_M; // read sample from the ADC1 sequence 0 FIFO
 }
+
+int getTriggerIndex(int triggerDirection) {
+    int i;
+    int tolerence = 20;
+
+    for(i = 63; i < ADC_BUFFER_SIZE/2; i++) {
+        int index = ADC_BUFFER_WRAP(gADCBufferIndex-i);
+        if(gADCBuffer[index] >= ADC_OFFSET-tolerence && gADCBuffer[index] <= ADC_OFFSET+tolerence) {
+            int dir = gADCBuffer[ADC_BUFFER_WRAP(index+2)] - gADCBuffer[ADC_BUFFER_WRAP(index-2)];
+            if((dir < 0 && triggerDirection) || (dir > 0 && !triggerDirection)) {
+                return i;
+            }
+        }
+    }
+    return gADCBufferIndex;
+}
+
+int voltageScale(uint16_t voltage, float div) {
+    float x = VIN_RANGE * PIXELS_PER_DIV;
+    float fScale = x/((1 << ADC_BITS) * div);
+    return LCD_VERTICAL_MAX/2 - (int)roundf(fScale * ((int)voltage - ADC_OFFSET));
+}
+

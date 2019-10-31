@@ -44,33 +44,41 @@ int main(void)
     ButtonInit();
     IntMasterEnable();
 
-    uint16_t trigger_index = 63;
-    uint16_t frames = 0;
-    uint16_t i;
+
 
     // full-screen rectangle
     tRectangle rectFullScreen = {0, 0, GrContextDpyWidthGet(&sContext)-1, GrContextDpyHeightGet(&sContext)-1};
 
     uint16_t ADC_local[128];
 
+    int i = 0;
+    uint16_t triggerDir = 0;
+    float div = 0.2;
+    char div_str[10];
+    char* slope[] = {"DOWN","UP"};
+
     while (true) {
         GrContextForegroundSet(&sContext, ClrBlack);
         GrRectFill(&sContext, &rectFullScreen); // fill screen with black
 
-        if(frames == 3){
-            frames = 0;
-            trigger_index=63;
+        GrContextForegroundSet(&sContext, ClrBlue); // blue lines
+        for(i = -3; i < 4; i++){
+            GrLineDrawH(&sContext, 0, LCD_HORIZONTAL_MAX-1,LCD_VERTICAL_MAX/2+i*PIXELS_PER_DIV);
+            GrLineDrawV(&sContext, LCD_HORIZONTAL_MAX/2+i*PIXELS_PER_DIV, 0,LCD_VERTICAL_MAX-1);
+        }
+        snprintf(div_str, sizeof(div_str), "%03d mV", (int)(div*1000));
+        GrContextForegroundSet(&sContext, ClrWhite); // white text
+        GrStringDraw(&sContext, "20 us", -1, 4, 0, /*opaque*/ false);
+        GrStringDraw(&sContext, div_str, -1, 45, 0, /*opaque*/ false);
+        GrStringDraw(&sContext, slope[triggerDir], -1, 100, 0, false);
+
+        uint16_t trigger = getTriggerIndex(triggerDir);
+        for(i = -63; i < 64; i++) {
+            ADC_local[i+63] = gADCBuffer[trigger+i];
         }
 
-        int16_t diff1 = gADCBuffer[trigger_index+1]-2048;
-        int16_t diff2 = gADCBuffer[trigger_index-1]-2048;
-        while(!((diff1&0x8000)^(diff2&0x8000))) trigger_index++;
-
-        for(i = trigger_index-63; i<trigger_index+64; i++) {
-            ADC_local[i] = gADCBuffer[trigger_index];
-        }
-
-        frames++;
+        GrContextForegroundSet(&sContext, ClrYellow); // yellow text
+        for(i = 0; i < 128; i++) GrCircleFill(&sContext, i, voltageScale(ADC_local[i], div),1);
         GrFlush(&sContext); // flush the frame buffer to the LCD
     }
 }
