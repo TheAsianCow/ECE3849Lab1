@@ -52,10 +52,11 @@ int main(void)
     uint16_t ADC_local[128];
 
     int i = 0;
-    uint16_t triggerDir = 0;
-    float div = 0.2;
+    int divNumber = 1;
+    uint16_t triggerDir = 1;
     char div_str[10];
-    char* slope[] = {"DOWN","UP"};
+    const char* slope[] = {"DOWN","UP"};
+    const float div[] = {0.1,0.2, 0.5, 1};
 
     while (true) {
         GrContextForegroundSet(&sContext, ClrBlack);
@@ -66,19 +67,41 @@ int main(void)
             GrLineDrawH(&sContext, 0, LCD_HORIZONTAL_MAX-1,LCD_VERTICAL_MAX/2+i*PIXELS_PER_DIV);
             GrLineDrawV(&sContext, LCD_HORIZONTAL_MAX/2+i*PIXELS_PER_DIV, 0,LCD_VERTICAL_MAX-1);
         }
-        snprintf(div_str, sizeof(div_str), "%03d mV", (int)(div*1000));
+
+        char data = 'A';
+        while(fifo_get(&data) != 0) {
+            switch(data) {
+            case 'D':
+                divNumber = divNumber > 0 ? divNumber-1 : divNumber;
+                break;
+            case 'U':
+                divNumber = divNumber < 3 ? divNumber+1 : divNumber;
+                break;
+            case 'T':
+                triggerDir = triggerDir == 1 ? 0 : 1;
+                break;
+            }
+        }
+
+        if(divNumber == 3) {
+            snprintf(div_str, sizeof(div_str), " 1 V");
+        }
+        else {
+            snprintf(div_str, sizeof(div_str), "%03d mV", (int)(div[divNumber]*1000));
+        }
+
+
         GrContextForegroundSet(&sContext, ClrWhite); // white text
         GrStringDraw(&sContext, "20 us", -1, 4, 0, /*opaque*/ false);
         GrStringDraw(&sContext, div_str, -1, 45, 0, /*opaque*/ false);
         GrStringDraw(&sContext, slope[triggerDir], -1, 100, 0, false);
 
-        uint16_t trigger = getTriggerIndex(triggerDir);
-        for(i = -63; i < 64; i++) {
-            ADC_local[i+63] = gADCBuffer[trigger+i];
+        int trigger = getTriggerIndex(triggerDir);
+        for(i = -64; i < 64; i++) {
+            ADC_local[i+64] = gADCBuffer[trigger+i];
         }
-
         GrContextForegroundSet(&sContext, ClrYellow); // yellow text
-        for(i = 0; i < 128; i++) GrCircleFill(&sContext, i, voltageScale(ADC_local[i], div),1);
+        for(i = 0; i < 128; i++) GrCircleFill(&sContext, i, voltageScale(ADC_local[i], div[divNumber]),1);
         GrFlush(&sContext); // flush the frame buffer to the LCD
     }
 }

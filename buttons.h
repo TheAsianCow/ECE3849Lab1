@@ -33,11 +33,15 @@
 #define JOYSTICK_LOWER_RELEASE_THRESHOLD 1000   // above this ADC value, button is released
 
 #define ADC_SAMPLING_RATE 1000000   // [samples/sec] desired ADC sampling rate
-#define CRYSTAL_FREQUENCY 25000000  // [Hz] crystal oscillator frequency used to calculate clock rates
+#define CRYSTAL_FREQUENCY 25000000  // [Hz] crystal oscillator frequency used to calculate clock rates\
+
+#define FIFO_SIZE 11        // FIFO capacity is 1 item fewer
 
 extern volatile uint32_t gButtons;	// debounced button state, one per bit in the lowest bits
 extern uint32_t gJoystick[2];       // joystick coordinates
 extern uint32_t gADCSamplingRate;   // [Hz] actual ADC sampling rate
+
+extern volatile char fifo[FIFO_SIZE];  // FIFO storage array
 
 // initialize all button and joystick handling hardware
 void ButtonInit(void);
@@ -51,5 +55,9 @@ void ButtonReadJoystick(void);
 
 // autorepeat button presses if a button is held long enough
 uint32_t ButtonAutoRepeat(void);
+
+int fifo_put(char data);
+
+int fifo_get(char *data);
 
 #endif /* BUTTONS_H_ */

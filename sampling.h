@@ -3,6 +3,7 @@
  *
  *  Created on: Oct 29, 2019
  *      Author: Jeffrey Huang
+ *              Ravi Kirschner
  */
 
 #ifndef SAMPLING_H_

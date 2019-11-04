@@ -3,6 +3,7 @@
  *
  *  Created on: Oct 29, 2019
  *      Author: Jeffrey Huang
+ *              Ravi Kirschner
  */
 #include "inc/tm4c1294ncpdt.h"
 #include "sampling.h"
@@ -53,18 +54,16 @@ void ADC_ISR(void){
 
 int getTriggerIndex(int triggerDirection) {
     int i;
-    int tolerence = 20;
+    int tolerence = 25;
 
-    for(i = 63; i < ADC_BUFFER_SIZE/2; i++) {
+    for(i = 64; i < ADC_BUFFER_SIZE/2; i++) {
         int index = ADC_BUFFER_WRAP(gADCBufferIndex-i);
         if(gADCBuffer[index] >= ADC_OFFSET-tolerence && gADCBuffer[index] <= ADC_OFFSET+tolerence) {
-            int dir = gADCBuffer[ADC_BUFFER_WRAP(index+2)] - gADCBuffer[ADC_BUFFER_WRAP(index-2)];
-            if((dir < 0 && triggerDirection) || (dir > 0 && !triggerDirection)) {
-                return i;
-            }
+            bool dir = gADCBuffer[ADC_BUFFER_WRAP(index+2)] > gADCBuffer[ADC_BUFFER_WRAP(index-2)];
+            if ((triggerDirection && dir) || (!triggerDirection && !dir)) return index;
         }
     }
-    return gADCBufferIndex;
+    return -1;
 }
 
 int voltageScale(uint16_t voltage, float div) {
@@ -72,4 +71,3 @@ int voltageScale(uint16_t voltage, float div) {
     float fScale = x/((1 << ADC_BITS) * div);
     return LCD_VERTICAL_MAX/2 - (int)roundf(fScale * ((int)voltage - ADC_OFFSET));
 }
-
