@@ -1,15 +1,15 @@
 # FIXED
 
 sysctl_pll.obj: ../sysctl_pll.c
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdbool.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdint.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/_stdint40.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/stdint.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/cdefs.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_types.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_types.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_stdint.h
-sysctl_pll.obj: D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_stdint.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdbool.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdint.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/_stdint40.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/stdint.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/cdefs.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_types.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_types.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_stdint.h
+sysctl_pll.obj: C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_stdint.h
 sysctl_pll.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/inc/hw_ints.h
 sysctl_pll.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/inc/hw_nvic.h
 sysctl_pll.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/inc/hw_sysctl.h
@@ -21,15 +21,15 @@ sysctl_pll.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.7
 sysctl_pll.obj: C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/driverlib/sysctl.h
 
 ../sysctl_pll.c: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdbool.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdint.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/_stdint40.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/stdint.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/cdefs.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_types.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_types.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_stdint.h: 
-D:/ccs/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_stdint.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdbool.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/stdint.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/_stdint40.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/stdint.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/cdefs.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_types.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_types.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/machine/_stdint.h: 
+C:/ti/ccs910/ccs/tools/compiler/ti-cgt-arm_18.12.2.LTS/include/sys/_stdint.h: 
 C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/inc/hw_ints.h: 
 C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/inc/hw_nvic.h: 
 C:/ti/tirtos_tivac_2_16_00_08/products/TivaWare_C_Series-2.1.1.71b/inc/hw_sysctl.h: 

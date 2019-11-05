@@ -22,6 +22,7 @@
 
 volatile uint32_t gADCErrors; // number of missed ADC deadlines
 volatile int32_t gADCBufferIndex = ADC_BUFFER_SIZE - 1; // latest sample index
+volatile uint16_t gADCBuffer[ADC_BUFFER_SIZE];
 
 void ADC1_Init(void){
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);

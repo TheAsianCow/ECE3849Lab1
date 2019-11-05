@@ -11,9 +11,12 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "inc/hw_memmap.h"
+#include "inc/hw_ints.h"
 #include "driverlib/fpu.h"
 #include "driverlib/sysctl.h"
 #include "driverlib/interrupt.h"
+#include "driverlib/timer.h"
 #include "Crystalfontz128x128_ST7735.h"
 #include <stdio.h>
 #include "buttons.h"
@@ -21,6 +24,11 @@
 
 uint32_t gSystemClock; // [Hz] system clock frequency
 volatile uint32_t gTime = 8345; // time in hundredths of a second
+
+uint32_t cpu_load_count(void);
+uint32_t count_unloaded = 0;
+uint32_t count_loaded = 0;
+float cpu_load = 0.0;
 
 int main(void)
 {
@@ -42,6 +50,15 @@ int main(void)
 
     ADC1_Init();
     ButtonInit();
+
+    // initialize timer 3 in one-shot mode for polled timing
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER3);
+    TimerDisable(TIMER3_BASE, TIMER_BOTH);
+    TimerConfigure(TIMER3_BASE, TIMER_CFG_ONE_SHOT);
+    TimerLoadSet(TIMER3_BASE, TIMER_A, 120000); // 1 sec interval
+
+    count_unloaded = cpu_load_count();
+
     IntMasterEnable();
 
 
@@ -55,12 +72,19 @@ int main(void)
     int divNumber = 1;
     uint16_t triggerDir = 1;
     char div_str[10];
+    char load_str[30];
     const char* slope[] = {"DOWN","UP"};
     const float div[] = {0.1,0.2, 0.5, 1};
+    int oldTrigger;
 
     while (true) {
         GrContextForegroundSet(&sContext, ClrBlack);
         GrRectFill(&sContext, &rectFullScreen); // fill screen with black
+
+
+        count_loaded = cpu_load_count();
+        cpu_load = 1.0f - (float)count_loaded/count_unloaded; // compute CPU load
+
 
         GrContextForegroundSet(&sContext, ClrBlue); // blue lines
         for(i = -3; i < 4; i++){
@@ -97,11 +121,29 @@ int main(void)
         GrStringDraw(&sContext, slope[triggerDir], -1, 100, 0, false);
 
         int trigger = getTriggerIndex(triggerDir);
+        if(trigger == -1) trigger = oldTrigger;
+        else oldTrigger = trigger;
         for(i = -64; i < 64; i++) {
             ADC_local[i+64] = gADCBuffer[trigger+i];
         }
         GrContextForegroundSet(&sContext, ClrYellow); // yellow text
-        for(i = 0; i < 128; i++) GrCircleFill(&sContext, i, voltageScale(ADC_local[i], div[divNumber]),1);
+        for(i = 0; i < 127; i++) GrLineDraw(&sContext, i, voltageScale(ADC_local[i], div[divNumber]), i+1, voltageScale(ADC_local[i+1], div[divNumber]));
+
+        snprintf(load_str, sizeof(load_str), "CPU load = %.1f%%", cpu_load*100);
+        GrContextForegroundSet(&sContext, ClrWhite); // yellow text
+        GrStringDraw(&sContext, load_str, -1, 0, 120, false);
+
+
         GrFlush(&sContext); // flush the frame buffer to the LCD
     }
+}
+
+uint32_t cpu_load_count(void)
+{
+    uint32_t i = 0;
+    TimerIntClear(TIMER3_BASE, TIMER_TIMA_TIMEOUT);
+    TimerEnable(TIMER3_BASE, TIMER_A); // start one-shot timer
+    while (!(TimerIntStatus(TIMER3_BASE, false) & TIMER_TIMA_TIMEOUT))
+        i++;
+    return i;
 }

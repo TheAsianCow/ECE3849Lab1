@@ -27,7 +27,7 @@ int getTriggerIndex(int triggerDirection);
 int voltageScale(uint16_t voltage, float div);
 #define ADC_BUFFER_SIZE 2048 // size must be a power of 2
 #define ADC_BUFFER_WRAP(i) ((i) & (ADC_BUFFER_SIZE - 1)) // index wrapping macro
-volatile uint16_t gADCBuffer[ADC_BUFFER_SIZE]; // circular buffer
+extern volatile uint16_t gADCBuffer[ADC_BUFFER_SIZE]; // circular buffer
 
 
 #endif /* SAMPLING_H_ */
