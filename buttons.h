@@ -56,8 +56,8 @@ void ButtonReadJoystick(void);
 // autorepeat button presses if a button is held long enough
 uint32_t ButtonAutoRepeat(void);
 
-int fifo_put(char data);
+int fifo_put(char data); //FIFO put function
 
-int fifo_get(char *data);
+int fifo_get(char *data); //FIFO get function
 
 #endif /* BUTTONS_H_ */

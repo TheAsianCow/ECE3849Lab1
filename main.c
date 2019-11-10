@@ -22,13 +22,13 @@
 #include "buttons.h"
 #include "sampling.h"
 
-uint32_t gSystemClock; // [Hz] system clock frequency
-volatile uint32_t gTime = 8345; // time in hundredths of a second
+uint32_t cpu_load_count(void); //prototype for cpu load functionm
 
-uint32_t cpu_load_count(void);
-uint32_t count_unloaded = 0;
-uint32_t count_loaded = 0;
-float cpu_load = 0.0;
+uint32_t gSystemClock; // [Hz] system clock frequency
+
+uint32_t count_unloaded = 0; //number of hits for unloaded CPU
+uint32_t count_loaded = 0; //number of hits for loaded CPU
+float cpu_load = 0.0; //ratio between loaded and unloaded in percent format
 
 int main(void)
 {
@@ -48,16 +48,16 @@ int main(void)
     GrContextInit(&sContext, &g_sCrystalfontz128x128); // Initialize the grlib graphics context
     GrContextFontSet(&sContext, &g_sFontFixed6x8); // select font
 
-    ADC1_Init();
-    ButtonInit();
+    ADC1_Init(); //initialize ADC
+    ButtonInit(); //initialize buttons
 
     // initialize timer 3 in one-shot mode for polled timing
     SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER3);
     TimerDisable(TIMER3_BASE, TIMER_BOTH);
     TimerConfigure(TIMER3_BASE, TIMER_CFG_ONE_SHOT);
-    TimerLoadSet(TIMER3_BASE, TIMER_A, 120000); // 1 sec interval
+    TimerLoadSet(TIMER3_BASE, TIMER_A, 120000); // 10ms interval
 
-    count_unloaded = cpu_load_count();
+    count_unloaded = cpu_load_count(); //read unloaded CPU hits while interrupts are disabled
 
     IntMasterEnable();
 
@@ -66,23 +66,23 @@ int main(void)
     // full-screen rectangle
     tRectangle rectFullScreen = {0, 0, GrContextDpyWidthGet(&sContext)-1, GrContextDpyHeightGet(&sContext)-1};
 
-    uint16_t ADC_local[128];
+    uint16_t ADC_local[128]; //local ADC buffer to draw from
 
-    int i = 0;
-    int divNumber = 1;
-    uint16_t triggerDir = 1;
-    char div_str[10];
-    char load_str[30];
-    const char* slope[] = {"DOWN","UP"};
-    const float div[] = {0.1,0.2, 0.5, 1};
-    int oldTrigger;
+    int i = 0; //loop variable
+    int divNumber = 1; //current division scale, 0->3 inclusive
+    uint16_t triggerDir = 1; //direction for trigger, 0 or 1
+    char div_str[10]; //division string buffer
+    char load_str[30]; //load string buffer
+    const char* slope[] = {"DOWN","UP"}; //slope strings to draw
+    const float div[] = {0.1,0.2, 0.5, 1}; //division values
+    int oldTrigger; //old trigger value, to be stored incase finding trigger returns -1
 
     while (true) {
         GrContextForegroundSet(&sContext, ClrBlack);
         GrRectFill(&sContext, &rectFullScreen); // fill screen with black
 
 
-        count_loaded = cpu_load_count();
+        count_loaded = cpu_load_count(); //get loaded CPU count
         cpu_load = 1.0f - (float)count_loaded/count_unloaded; // compute CPU load
 
 
@@ -92,22 +92,22 @@ int main(void)
             GrLineDrawV(&sContext, LCD_HORIZONTAL_MAX/2+i*PIXELS_PER_DIV, 0,LCD_VERTICAL_MAX-1);
         }
 
-        char data = 'A';
+        char data = 'A'; //data to be returned into by fifo_get
         while(fifo_get(&data) != 0) {
             switch(data) {
-            case 'D':
+            case 'D': //if down, decrement divNumber
                 divNumber = divNumber > 0 ? divNumber-1 : divNumber;
                 break;
-            case 'U':
+            case 'U': //if up, increment divNumber
                 divNumber = divNumber < 3 ? divNumber+1 : divNumber;
                 break;
-            case 'T':
+            case 'T': //if trigger, change the trigger direction
                 triggerDir = triggerDir == 1 ? 0 : 1;
                 break;
             }
         }
 
-        if(divNumber == 3) {
+        if(divNumber == 3) { //if divNumber is 3, special string protocol to show V instead of mV
             snprintf(div_str, sizeof(div_str), " 1 V");
         }
         else {
@@ -116,23 +116,25 @@ int main(void)
 
 
         GrContextForegroundSet(&sContext, ClrWhite); // white text
-        GrStringDraw(&sContext, "20 us", -1, 4, 0, /*opaque*/ false);
-        GrStringDraw(&sContext, div_str, -1, 45, 0, /*opaque*/ false);
-        GrStringDraw(&sContext, slope[triggerDir], -1, 100, 0, false);
+        GrStringDraw(&sContext, "20 us", -1, 4, 0, /*opaque*/ false); //draw time scale
+        GrStringDraw(&sContext, div_str, -1, 45, 0, /*opaque*/ false); //draw division scale
+        GrStringDraw(&sContext, slope[triggerDir], -1, 100, 0, false); //draw trigger direction
 
-        int trigger = getTriggerIndex(triggerDir);
-        if(trigger == -1) trigger = oldTrigger;
+        int trigger = getTriggerIndex(triggerDir); //get trigger
+        if(trigger == -1) trigger = oldTrigger; //if we don't find trigger, use the old trigger.
         else oldTrigger = trigger;
+
         for(i = -64; i < 64; i++) {
-            ADC_local[i+64] = gADCBuffer[trigger+i];
+            ADC_local[i+64] = gADCBuffer[trigger+i]; //read into local buffer
         }
-        GrContextForegroundSet(&sContext, ClrYellow); // yellow text
+
+        //draw the oscope waveform
+        GrContextForegroundSet(&sContext, ClrYellow); // yellow lines
         for(i = 0; i < 127; i++) GrLineDraw(&sContext, i, voltageScale(ADC_local[i], div[divNumber]), i+1, voltageScale(ADC_local[i+1], div[divNumber]));
 
         snprintf(load_str, sizeof(load_str), "CPU load = %.1f%%", cpu_load*100);
-        GrContextForegroundSet(&sContext, ClrWhite); // yellow text
-        GrStringDraw(&sContext, load_str, -1, 0, 120, false);
-
+        GrContextForegroundSet(&sContext, ClrWhite); // white text
+        GrStringDraw(&sContext, load_str, -1, 0, 120, false); //draw cpu load text
 
         GrFlush(&sContext); // flush the frame buffer to the LCD
     }

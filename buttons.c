@@ -26,7 +26,6 @@ uint32_t gADCSamplingRate;      // [Hz] actual ADC sampling rate
 
 // imported globals
 extern uint32_t gSystemClock;   // [Hz] system clock frequency
-extern volatile uint32_t gTime; // time in hundredths of a second
 
 //FIFO
 volatile char fifo[FIFO_SIZE];  // FIFO storage array
@@ -163,7 +162,7 @@ void ButtonISR(void) {
     // read hardware button state
     uint32_t gpio_buttons =
             ~GPIOPinRead(GPIO_PORTJ_BASE, 0xff) & (GPIO_PIN_1 | GPIO_PIN_0); // EK-TM4C1294XL buttons in positions 0 and 1
-    gpio_buttons |= ((~GPIOPinRead(GPIO_PORTD_BASE, 0xff) & (GPIO_PIN_4)));
+    gpio_buttons |= ((~GPIOPinRead(GPIO_PORTD_BASE, 0xff) & (GPIO_PIN_4))); //Joystick Select
 
     uint32_t old_buttons = gButtons;    // save previous button state
     ButtonDebounce(gpio_buttons);       // Run the button debouncer. The result is in gButtons.
@@ -171,25 +170,18 @@ void ButtonISR(void) {
     uint32_t presses = ~old_buttons & gButtons;   // detect button presses (transitions from not pressed to pressed)
     presses |= ButtonAutoRepeat();      // autorepeat presses if a button is held long enough
 
-    static bool tic = false;
-    static bool running = true;
-
     if (presses & 1) { // EK-TM4C1294XL button 1 pressed
-        fifo_put('D');
+        fifo_put('D'); //put "Down" into FIFO
     }
 
-    if(presses & 2) {
-        fifo_put('U');
+    if(presses & 2) { // EK-TM4C1294XL button 2 pressed
+        fifo_put('U'); //put "Up" into FIFO
     }
 
-    if(presses & 16) {
-        fifo_put('T');
+    if(presses & 16) { // Joystick select pressed
+        fifo_put('T'); //put "Trigger" into FIFO
     }
 
-    if (running) {
-        if (tic) gTime++; // increment time every other ISR call
-        tic = !tic;
-    }
 }
 
 

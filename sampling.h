@@ -11,15 +11,15 @@
 
 #include <stdint.h>
 
-#define ADC1_INT_PRIORITY 0
+#define ADC1_INT_PRIORITY 0 //priority for ADC1
 
 
 #define ADC_SAMPLING_RATE 1000000   // [samples/sec] desired ADC sampling rate
 #define CRYSTAL_FREQUENCY 25000000  // [Hz] crystal oscillator frequency used to calculate clock rates
-#define ADC_OFFSET 2048
-#define VIN_RANGE 3.3
-#define PIXELS_PER_DIV 20
-#define ADC_BITS 12
+#define ADC_OFFSET 2048 //DC average of waveform
+#define VIN_RANGE 3.3 //Vpkpk
+#define PIXELS_PER_DIV 20 //Distance between division lines
+#define ADC_BITS 12 //Input bits of the ADC
 
 
 void ADC1_Init(void);
